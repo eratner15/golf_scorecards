@@ -1,0 +1,386 @@
+/* style.css */
+
+/* Apply base styles using Google Fonts loaded in HTML */
+body {
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+}
+
+/* Style for the selected game button in the selection screen */
+.game-select-btn.selected {
+    background-color: #003366; /* brand-navy */
+    outline: 2px solid #F47863; /* brand-coral */
+    outline-offset: 2px;
+}
+
+/* General scorecard table styling */
+.scorecard-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    font-size: 0.875rem; /* text-sm */
+}
+
+.scorecard-table th,
+.scorecard-table td {
+    border: 1px solid #d1d5db; /* gray-300 */
+    padding: 0.5rem; /* p-2 */
+    text-align: center;
+    vertical-align: middle;
+}
+
+/* Standard header cell style */
+.scorecard-table th.th-std, /* Use a common class for header cells */
+.scorecard-table thead th { /* Apply to all thead th */
+    background-color: #f3f4f6; /* gray-100 */
+    font-weight: 600; /* font-semibold */
+    padding: 0.3rem 0.5rem; /* Consistent padding */
+    text-align: center;
+    vertical-align: middle;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem; /* text-xs */
+}
+
+/* Standard data cell style */
+.scorecard-table td.td-std, /* Use a common class for data cells */
+.scorecard-table tbody td { /* Apply to all tbody td */
+     padding: 0.3rem 0.5rem; /* Consistent padding */
+     text-align: center;
+     vertical-align: middle;
+     font-size: 0.875rem; /* text-sm */
+     white-space: nowrap; /* Prevent wrapping in cells */
+}
+
+/* Styling for input fields within table cells */
+.scorecard-table input[type="text"].input-std,
+.scorecard-table input[type="number"].input-std,
+.scorecard-table select.input-std,
+/* Apply base input style broadly */
+.scorecard-table input[type="text"],
+.scorecard-table input[type="number"],
+.scorecard-table select {
+    width: 100%;
+    padding: 0.25rem 0.5rem; /* p-1 px-2 */
+    border: 1px solid #d1d5db; /* gray-300 */
+    border-radius: 0.375rem; /* rounded-md */
+    box-sizing: border-box;
+    text-align: center;
+    font-size: 0.875rem; /* text-sm */
+}
+
+/* Input styling for focus and validation */
+.scorecard-table input:focus,
+.scorecard-table select:focus {
+    outline: none;
+    border-color: #F47863; /* brand-coral */
+    box-shadow: 0 0 0 2px rgba(244, 120, 99, 0.25);
+}
+
+.scorecard-table input:invalid {
+    border-color: #dc2626; /* red-600 */
+    background-color: rgba(254, 226, 226, 0.4); /* red-100 with opacity */
+}
+
+/* Apply validation styles but keep fields usable */
+.scorecard-table input.input-warning {
+    border-color: #f59e0b; /* amber-500 */
+    background-color: rgba(254, 243, 199, 0.4); /* amber-100 with opacity */
+}
+
+/* More specific input styling */
+.input-score { /* Class for score inputs */
+    max-width: 4rem;
+    margin: 0 auto;
+}
+
+.input-par { /* Class for par inputs */
+     max-width: 3rem;
+}
+
+/* Checkbox styling */
+.bingo-checkbox {
+    height: 1rem; /* h-4 */
+    width: 1rem; /* w-4 */
+    text-align: center;
+    margin: auto; /* Center checkbox */
+    color: #003366; /* brand-navy */
+    cursor: pointer;
+}
+.bingo-checkbox:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(244, 120, 99, 0.25); /* brand-coral with opacity */
+}
+
+/* Style for rotating player names vertically if needed */
+.vertical-text {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+}
+
+/* Styles for displaying match status (Win/Loss/Halve) */
+.status-win { color: #16a34a; font-weight: bold; } /* green-600 */
+.status-loss { color: #dc2626; font-weight: bold; } /* red-600 */
+.status-halve { color: #6b7280; } /* gray-500 */
+
+/* Styles for positive/negative numbers (e.g., vs Quota) */
+.value-positive { color: #16a34a; font-weight: bold; } /* green-600 */
+.value-negative { color: #dc2626; font-weight: bold; } /* red-600 */
+
+/* Responsive styles for mobile */
+@media (max-width: 768px) {
+    .scorecard-table {
+        font-size: 0.75rem; /* Smaller text on mobile */
+    }
+    
+    .input-score {
+        max-width: 2.5rem; /* Narrower inputs on mobile */
+    }
+    
+    .input-par {
+        max-width: 2rem; /* Narrower inputs on mobile */
+    }
+    
+    /* Allow horizontal scrolling on tables */
+    .overflow-x-auto {
+        scrollbar-width: thin;
+        scrollbar-color: #d1d5db transparent;
+    }
+    
+    /* Custom scrollbar styling */
+    .overflow-x-auto::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    
+    .overflow-x-auto::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 20px;
+    }
+}
+
+/* Loading animation */
+.loading-spinner {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 3px solid #F47863; /* brand-coral */
+    width: 24px;
+    height: 24px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alert styling */
+.alert {
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+}
+
+.alert-success {
+    background-color: #d1fae5; /* green-100 */
+    color: #065f46; /* green-800 */
+    border-left: 4px solid #10b981; /* green-500 */
+}
+
+.alert-error {
+    background-color: #fee2e2; /* red-100 */
+    color: #991b1b; /* red-800 */
+    border-left: 4px solid #ef4444; /* red-500 */
+}
+
+.alert-warning {
+    background-color: #fff7ed; /* orange-50 */
+    color: #9a3412; /* orange-800 */
+    border-left: 4px solid #f97316; /* orange-500 */
+}
+
+/* --- Game Specific Styles --- */
+
+/* #nassau-card specific styles */
+#nassau-card .scorecard-table td,
+#nassau-card .scorecard-table th {
+    transition: background-color 0.2s ease-in-out;
+}
+
+#nassau-card .scorecard-table tr:hover {
+    background-color: #f8fafc; /* slate-50 */
+}
+
+/* #skins-card specific styles */
+#skins-card .skin-winner-cell {
+    font-weight: bold;
+    background-color: rgba(148, 219, 185, 0.2); /* brand-seafoam with opacity */
+}
+
+/* #wolf-card specific styles */
+#wolf-card .wolf-player {
+    font-weight: bold;
+    background-color: rgba(209, 159, 19, 0.15); /* brand-gold with opacity */
+}
+
+/* #bingo-card specific styles */
+#bingo-card .scorecard-table th,
+#bingo-card .scorecard-table td {
+    padding: 0.2rem 0.3rem; /* Make Bingo cells smaller */
+}
+
+#bingo-card .point-winner {
+    background-color: rgba(244, 120, 99, 0.15); /* brand-coral with opacity */
+}
+
+/* #bloodsome-card specific styles */
+#bloodsome-card .drive-used {
+    font-weight: bold;
+    font-style: italic;
+}
+
+/* #stableford-card specific styles */
+#stableford-card .high-points {
+    background-color: rgba(148, 219, 185, 0.2); /* brand-seafoam with opacity */
+}
+
+/* #banker-card specific styles */
+#banker-card .above-quota {
+    color: #16a34a; /* green-600 */
+}
+#banker-card .below-quota {
+    color: #dc2626; /* red-600 */
+}
+
+/* #vegas-card specific styles */
+#vegas-card .vegas-number {
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}
+
+/* Utility class to hide elements */
+.hidden {
+    display: none !important;
+}
+
+/* Fade-in animation */
+.fade-in {
+    animation: fadeIn 0.3s ease-in forwards;
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Base styles */
+.input-std {
+    @apply mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-coral focus:border-brand-coral sm:text-sm;
+}
+
+.th-std {
+    @apply px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+}
+
+.td-std {
+    @apply px-3 py-2 whitespace-nowrap text-sm text-gray-900;
+}
+
+/* Game selection styles */
+.game-select-btn {
+    @apply transition-all duration-200 ease-in-out;
+}
+
+.game-select-btn:hover {
+    @apply transform scale-105;
+}
+
+.game-select-btn:active {
+    @apply transform scale-95;
+}
+
+/* Scorecard styles */
+.scorecard {
+    @apply transition-all duration-300 ease-in-out;
+}
+
+.scorecard.hidden {
+    @apply opacity-0 pointer-events-none;
+}
+
+.scorecard:not(.hidden) {
+    @apply opacity-100;
+}
+
+/* Input styles */
+input[type="number"] {
+    @apply text-right;
+}
+
+/* Status colors */
+.status-win {
+    @apply text-green-600 font-semibold;
+}
+
+.status-loss {
+    @apply text-red-600 font-semibold;
+}
+
+.status-halve {
+    @apply text-gray-600 font-semibold;
+}
+
+/* Value colors */
+.value-positive {
+    @apply text-green-600;
+}
+
+.value-negative {
+    @apply text-red-600;
+}
+
+/* Loading animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Alert message styles */
+#alert-message {
+    @apply transition-all duration-300 ease-in-out;
+}
+
+#alert-message.hidden {
+    @apply opacity-0 transform -translate-y-2 pointer-events-none;
+}
+
+#alert-message:not(.hidden) {
+    @apply opacity-100 transform translate-y-0;
+}
+
+/* Loading overlay styles */
+#loading-overlay {
+    @apply transition-opacity duration-300 ease-in-out;
+}
+
+#loading-overlay.hidden {
+    @apply opacity-0 pointer-events-none;
+}
+
+#loading-overlay:not(.hidden) {
+    @apply opacity-100;
+}

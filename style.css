@@ -1,0 +1,189 @@
+/* Wolf Game Specific Styles */
+.wolf-scorecard .col-hole { width: 5%; }
+.wolf-scorecard .col-wolf { width: 7%; }
+.wolf-scorecard .col-teams { width: 20%; }
+.wolf-scorecard .col-format { width: 10%; }
+.wolf-scorecard .col-status { width: 8%; }
+.wolf-scorecard .col-pts { width: 10%; }
+
+.format-checkbox {
+    transform: scale(0.8);
+    margin: 0 auto;
+    display: block;
+}
+
+.winner-mark {
+    color: #dc2626;
+    font-weight: bold;
+}
+
+.key-box h4 {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    color: #1e293b;
+}
+
+.key-box ul, .key-box ol {
+    font-size: 0.75rem;
+    color: #334155;
+    line-height: 1.4;
+}
+
+.key-box li {
+    margin-bottom: 0.2rem;
+}
+
+.key-box ul {
+    padding-left: 1rem;
+}
+
+/* Input field styling */
+.info-input {
+    border: 1px solid #cbd5e1;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    width: 100%;
+}
+
+/* Nassau Game Specific Styles */
+.scorecard-table, .press-table, .settlement-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 1rem;
+    table-layout: fixed;
+    font-size: 0.75rem;
+}
+
+.scorecard-table th, .scorecard-table td,
+.press-table th, .press-table td,
+.settlement-table th, .settlement-table td {
+    border: 1px solid #cbd5e1;
+    padding: 0.4rem 0.2rem;
+    text-align: center;
+    height: 2.2rem;
+    vertical-align: middle;
+}
+
+.scorecard-table th, .press-table th, .settlement-table th {
+    background-color: #1e293b;
+    color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.scorecard-table .col-hole { width: 5%; }
+.scorecard-table .col-par { width: 5%; }
+.scorecard-table .col-hcp { width: 5%; }
+.scorecard-table .col-score { width: 7%; }
+.scorecard-table .col-status { width: 7%; }
+
+.press-table .col-press-init { width: 15%; }
+.press-table .col-press-hole { width: 10%; }
+.press-table .col-press-match { width: 15%; }
+.press-table .col-press-type { width: 15%; }
+.press-table .col-press-status { width: 15%; }
+.press-table .col-press-value { width: 15%; }
+.press-table .col-press-notes { width: 15%; }
+
+.settlement-table .col-settle-item { width: 20%; text-align: left; padding-left: 0.5rem;}
+.settlement-table .col-settle-player { width: 20%; }
+
+.logo-placeholder {
+    width: 50px;
+    height: 50px;
+    background-color: #60a5fa;
+    border-radius: 0.375rem;
+    border: 2px solid #1e293b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: #1e293b;
+    font-size: 1.5rem;
+}
+
+.status-help-text {
+    font-size: 0.65rem;
+    color: #64748b;
+    text-align: center;
+    margin-top: -0.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.cell-input {
+    width: 90%;
+    height: 1.8rem;
+    text-align: center;
+    border: none;
+    padding: 0.1rem;
+    font-size: 0.75rem;
+    background-color: transparent;
+}
+
+.cell-input:focus {
+    outline: 1px solid #60a5fa;
+    background-color: white;
+}
+
+.total-row td {
+    background-color: #e2e8f0;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.grand-total-row td {
+    background-color: #1e293b;
+    font-weight: bold;
+    color: white;
+}
+
+/* Skins Game Specific Styles */
+.scorecard-table .col-hole { width: 5%; }
+.scorecard-table .col-par { width: 5%; }
+.scorecard-table .col-score { width: 10%; }
+.scorecard-table .col-winner { width: 15%; }
+.scorecard-table .col-value { width: 10%; }
+.scorecard-table .col-carryover { width: 10%; }
+.scorecard-table .col-validation { width: 8%; }
+
+.settlement-table .col-settle-player { width: 25%; text-align: left; padding-left: 0.5rem;}
+.settlement-table .col-settle-skins { width: 20%; }
+.settlement-table .col-settle-value { width: 25%; }
+.settlement-table .col-settle-total { width: 30%; }
+
+.validation-checkbox {
+    transform: scale(0.8);
+    margin: 0 auto;
+    display: block;
+}
+
+.rules-box {
+    border: 1px solid #cbd5e1;
+    background-color: #f1f5f9;
+    padding: 0.75rem 1rem;
+    border-radius: 0.375rem;
+    margin-top: 1.5rem;
+    font-size: 0.8rem;
+    color: #334155;
+}
+
+.rules-box h4 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    text-transform: uppercase;
+    color: #1e293b;
+}
+
+.rules-box ul {
+    list-style: disc;
+    padding-left: 1.2rem;
+}
+
+.rules-box li {
+    margin-bottom: 0.25rem;
+} 

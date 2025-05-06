@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Peel & Eat Golf Scorecards - Track your golf games, calculate winnings and settle bets">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    <title>Peel & Eat Golf Scorecards</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script>
+        // Configure Tailwind
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                    },
+                    colors: {
+                        'brand-navy': '#003366',
+                        'brand-coral': '#F47863',
+                        'brand-seafoam': '#94DBB9',
+                        'brand-gold': '#D19F13',
+                        'brand-ivory': '#F7F5EA',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+    <header class="bg-brand-navy text-white p-4 shadow-md">
+        <h1 class="text-2xl font-serif text-center">Peel & Eat Golf Scorecards</h1>
+    </header>
+
+    <main class="container mx-auto p-4 mt-4">
+        <!-- Loading overlay -->
+        <div id="loading-overlay" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+            <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-coral mx-auto mb-4"></div>
+                <p class="text-lg font-semibold">Loading your scorecard...</p>
+            </div>
+        </div>
+
+        <!-- Alert message box -->
+        <div id="alert-message" class="fixed top-4 left-1/2 transform -translate-x-1/2 max-w-md w-full bg-white rounded-lg shadow-lg p-4 z-50 hidden">
+            <div class="flex items-center">
+                <div id="alert-icon" class="flex-shrink-0 w-6 h-6 mr-3"></div>
+                <div id="alert-content" class="flex-1"></div>
+                <button id="alert-close" class="flex-shrink-0 ml-3 text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <section id="game-selection" class="bg-white p-6 rounded-lg shadow mb-6">
+            <h2 class="text-xl font-semibold mb-4 text-brand-navy">Select Your Game</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <button data-game="nassau" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Nassau">Nassau</button>
+                <button data-game="skins" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Skins">Skins</button>
+                <button data-game="wolf" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Wolf">Wolf</button>
+                <button data-game="bingo" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Bingo Bango Bongo">Bingo Bango Bongo</button>
+                <button data-game="bloodsome" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Bloodsome">Bloodsome</button>
+                <button data-game="stableford" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Stableford">Stableford</button>
+                <button data-game="banker" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Banker/Quota">Banker/Quota</button>
+                <button data-game="vegas" class="game-select-btn bg-brand-coral hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Vegas">Vegas</button>
+            </div>
+            <button id="resume-round-btn" class="mt-4 w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition duration-150 ease-in-out hidden" aria-label="Resume Previous Round">Resume Previous Round</button>
+        </section>
+
+        <section id="active-scorecard" class="hidden">
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button id="back-to-selection-btn" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Change Game">&larr; Change Game</button>
+                <button id="clear-round-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Clear Current Round">Clear Current Round</button>
+                <button id="copy-summary-btn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Copy Summary">Copy Summary</button>
+                <button id="export-data-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Export Data">Export Data</button>
+                <button id="import-data-btn" class="bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded-lg transition duration-150 ease-in-out" aria-label="Import Data">Import Data</button>
+                <input type="file" id="import-file-input" class="hidden" accept=".json">
+            </div>
+
+            <!-- Scrollable container for tables on mobile -->
+            <div class="overflow-x-auto pb-2">
+                <!-- Nassau Card -->
+                <div id="nassau-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-brand-navy text-center">Nassau Match</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 border-b pb-4">
+                        <div><label for="nassau-player1-name" class="block text-sm font-medium text-gray-700">Player 1 Name:</label><input type="text" id="nassau-player1-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-coral focus:border-brand-coral sm:text-sm" aria-label="Player 1 Name"></div>
+                        <div><label for="nassau-player2-name" class="block text-sm font-medium text-gray-700">Player 2 Name:</label><input type="text" id="nassau-player2-name" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-coral focus:border-brand-coral sm:text-sm" aria-label="Player 2 Name"></div>
+                        <div><label for="nassau-wager" class="block text-sm font-medium text-gray-700">Wager per Match ($):</label><input type="number" id="nassau-wager" min="0" step="1" value="5" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-brand-coral focus:border-brand-coral sm:text-sm" aria-label="Wager Amount"></div>
+                        <div><label for="nassau-press-rule" class="block text-sm font-medium text-gray-700">Press Rule:</label><select id="nassau-press-rule" class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-brand-coral focus:border-brand-coral sm:text-sm" aria-label="Press Rule"><option value="manual">Manual Press</option><option value="auto-2down">Auto 2 Down</option><option value="none">No Presses</option></select></div>
+                        <div class="md:col-span-2 flex items-end justify-end space-x-2"><button id="nassau-press-btn-p1" class="nassau-press-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded text-sm hidden" data-player="1" aria-label="Press for Player 1">Press (P1)</button><button id="nassau-press-btn-p2" class="nassau-press-btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-3 rounded text-sm hidden" data-player="2" aria-label="Press for Player 2">Press (P2)</button></div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 scorecard-table" aria-label="Nassau Scorecard">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="th-std">Hole</th>
+                                    <th scope="col" class="th-std">Par</th>
+                                    <th scope="col" id="nassau-th-p1" class="th-std">Player 1</th>
+                                    <th scope="col" id="nassau-th-p2" class="th-std">Player 2</th>
+                                    <th scope="col" class="th-std">Result</th>
+                                    <th scope="col" class="th-std">Status</th>
+                                    <th scope="col" class="th-std">Presses</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="nassau-scorecard-body">
+                                <!-- Rows will be generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="nassau-settlement" class="mt-6 border-t pt-4">
+                        <h4 class="text-lg font-semibold mb-2 text-brand-navy">Settlement</h4>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between"><span>Front 9 (<span id="nassau-settlement-front9-status">--</span>):</span><span id="nassau-settlement-front9-amount">$0.00</span></div>
+                            <div class="flex justify-between"><span>Back 9 (<span id="nassau-settlement-back9-status">--</span>):</span><span id="nassau-settlement-back9-amount">$0.00</span></div>
+                            <div class="flex justify-between"><span>Overall (<span id="nassau-settlement-overall-status">--</span>):</span><span id="nassau-settlement-overall-amount">$0.00</span></div>
+                            <div class="flex justify-between"><span>Presses (<span id="nassau-settlement-presses-count">0</span>):</span><span id="nassau-settlement-presses-amount">$0.00</span></div>
+                            <hr class="my-2">
+                            <div class="flex justify-between font-bold text-base"><span id="nassau-settlement-winner-name">Player --</span><span id="nassau-settlement-total-amount">$0.00</span></div>
+                            <div class="text-xs text-gray-600 text-center" id="nassau-settlement-summary-text">Player 1 owes Player 2 $0.00</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Other game cards follow similar pattern -->
+                <!-- Skins Card -->
+                <div id="skins-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-brand-navy text-center">Skins Game</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 border-b pb-4">
+                        <div><label for="skins-p1-name" class="block text-sm font-medium text-gray-700">Player 1:</label><input type="text" id="skins-p1-name" class="skins-player-name mt-1 w-full input-std" aria-label="Player 1 Name"></div>
+                        <div><label for="skins-p2-name" class="block text-sm font-medium text-gray-700">Player 2:</label><input type="text" id="skins-p2-name" class="skins-player-name mt-1 w-full input-std" aria-label="Player 2 Name"></div>
+                        <div><label for="skins-p3-name" class="block text-sm font-medium text-gray-700">Player 3:</label><input type="text" id="skins-p3-name" class="skins-player-name mt-1 w-full input-std" aria-label="Player 3 Name"></div>
+                        <div><label for="skins-p4-name" class="block text-sm font-medium text-gray-700">Player 4:</label><input type="text" id="skins-p4-name" class="skins-player-name mt-1 w-full input-std" aria-label="Player 4 Name"></div>
+                        <div><label for="skins-wager" class="block text-sm font-medium text-gray-700">Value per Skin ($):</label><input type="number" id="skins-wager" min="0" step="0.5" value="1" class="mt-1 w-full input-std" aria-label="Value per Skin"></div>
+                        <div class="flex items-center space-x-4">
+                            <label for="skins-validation" class="flex items-center text-sm font-medium text-gray-700"><input type="checkbox" id="skins-validation" class="h-4 w-4 text-brand-coral focus:ring-brand-coral border-gray-300 rounded mr-2" aria-label="Par/Birdie Validation"> Par/Birdie Validation</label>
+                            <label for="skins-carryover" class="flex items-center text-sm font-medium text-gray-700"><input type="checkbox" id="skins-carryover" checked class="h-4 w-4 text-brand-coral focus:ring-brand-coral border-gray-300 rounded mr-2" aria-label="Carryovers"> Carryovers</label>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 scorecard-table" aria-label="Skins Scorecard">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="th-std">Hole</th>
+                                    <th class="th-std">Par</th>
+                                    <th id="skins-th-p1" class="th-std">P1</th>
+                                    <th id="skins-th-p2" class="th-std">P2</th>
+                                    <th id="skins-th-p3" class="th-std">P3</th>
+                                    <th id="skins-th-p4" class="th-std">P4</th>
+                                    <th class="th-std">Skin Winner</th>
+                                    <th class="th-std">Value ($)</th>
+                                    <th class="th-std">C/O ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="skins-scorecard-body">
+                                <!-- Rows will be generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="skins-settlement" class="mt-6 border-t pt-4">
+                        <h4 class="text-lg font-semibold mb-2 text-brand-navy">Settlement (Total Pot: $<span id="skins-total-pot">0.00</span>)</h4>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                            <div><strong id="skins-settle-p1-name">Player 1:</strong> <span id="skins-settle-p1-skins">0</span> Skins, $<span id="skins-settle-p1-winnings">0.00</span></div>
+                            <div><strong id="skins-settle-p2-name">Player 2:</strong> <span id="skins-settle-p2-skins">0</span> Skins, $<span id="skins-settle-p2-winnings">0.00</span></div>
+                            <div><strong id="skins-settle-p3-name">Player 3:</strong> <span id="skins-settle-p3-skins">0</span> Skins, $<span id="skins-settle-p3-winnings">0.00</span></div>
+                            <div><strong id="skins-settle-p4-name">Player 4:</strong> <span id="skins-settle-p4-skins">0</span> Skins, $<span id="skins-settle-p4-winnings">0.00</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wolf Card -->
+                <div id="wolf-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <!-- Content for Wolf card will be similar to the other cards -->
+                </div>
+
+                <!-- Bingo Card -->
+                <div id="bingo-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <!-- Content for Bingo card will be similar to the other cards -->
+                </div>
+
+                <!-- Bloodsome Card -->
+                <div id="bloodsome-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <!-- Content for Bloodsome card will be similar to the other cards -->
+                </div>
+
+                <!-- Stableford Card -->
+                <div id="stableford-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <!-- Content for Stableford card will be similar to the other cards -->
+                </div>
+
+                <!-- Banker Card -->
+                <div id="banker-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <!-- Content for Banker card will be similar to the other cards -->
+                </div>
+
+                <!-- Vegas Card -->
+                <div id="vegas-card" class="scorecard bg-white p-4 md:p-6 rounded-lg shadow-md hidden">
+                    <h3 class="text-xl font-semibold mb-4 text-brand-navy text-center">Vegas</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 border-b pb-4">
+                        <div><label class="block text-sm font-medium text-gray-700">Team 1:</label><div class="flex space-x-2"><input type="text" id="vegas-pA-name" placeholder="Player A" class="mt-1 w-1/2 input-std vegas-player-name" aria-label="Player A Name"><input type="text" id="vegas-pB-name" placeholder="Player B" class="mt-1 w-1/2 input-std vegas-player-name" aria-label="Player B Name"></div></div>
+                        <div><label class="block text-sm font-medium text-gray-700">Team 2:</label><div class="flex space-x-2"><input type="text" id="vegas-pC-name" placeholder="Player C" class="mt-1 w-1/2 input-std vegas-player-name" aria-label="Player C Name"><input type="text" id="vegas-pD-name" placeholder="Player D" class="mt-1 w-1/2 input-std vegas-player-name" aria-label="Player D Name"></div></div>
+                        <div><label for="vegas-point-value" class="block text-sm font-medium text-gray-700">Value per Point ($):</label><input type="number" id="vegas-point-value" min="0" step="0.1" value="1" class="mt-1 w-full input-std" aria-label="Value per Point"></div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 scorecard-table" aria-label="Vegas Scorecard">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th rowspan="2" class="th-std align-middle">Hole</th>
+                                    <th colspan="2" id="vegas-th-t1" class="th-std">Team 1</th>
+                                    <th colspan="2" id="vegas-th-t2" class="th-std">Team 2</th>
+                                    <th rowspan="2" class="th-std align-middle">T1 Num</th>
+                                    <th rowspan="2" class="th-std align-middle">T2 Num</th>
+                                    <th rowspan="2" class="th-std align-middle">Pts Diff (+/- T1)</th>
+                                </tr>
+                                <tr>
+                                    <th id="vegas-th-pA" class="th-std text-xs">Score A</th>
+                                    <th id="vegas-th-pB" class="th-std text-xs">Score B</th>
+                                    <th id="vegas-th-pC" class="th-std text-xs">Score C</th>
+                                    <th id="vegas-th-pD" class="th-std text-xs">Score D</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="vegas-scorecard-body">
+                                <!-- Rows will be generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="vegas-settlement" class="mt-6 border-t pt-4">
+                        <h4 class="text-lg font-semibold mb-2 text-brand-navy">Settlement</h4>
+                        <div class="text-center font-bold" id="vegas-settlement-summary-text">Team -- owes Team -- $0.00</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center text-gray-500 text-sm p-4 mt-8">
+        &copy; <span id="current-year"></span> Peel & Eat Scorecards. Focus. Compete. Settle Up.
+    </footer>
+
+    <script src="dist/bundle.js"></script>
+</body>
+</html>

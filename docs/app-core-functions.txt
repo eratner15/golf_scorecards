@@ -1,0 +1,109 @@
+/**
+ * Debounced version of updateActiveCard to avoid excessive updates
+ */
+const debouncedUpdate = function(gameType, event) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        console.log(`Debounced update for ${gameType}...`);
+        
+        switch (gameType) {
+            case 'nassau': updateNassau(event); break;
+            case 'skins': updateSkins(); break;
+            case 'wolf': updateWolf(); break;
+            case 'bingo': updateBingo(); break;
+            case 'bloodsome': updateBloodsome(); break;
+            case 'stableford': updateStableford(); break;
+            case 'banker': updateBanker(); break;
+            case 'vegas': updateVegas(); break;
+        }
+    }, 300); // 300ms debounce delay
+};/**
+ * Core application functions for Peel & Eat Golf Scorecards
+ * 
+ * This file contains the main application functions that handle initialization,
+ * state management, UI updates, and event handling.
+ */
+
+/**
+ * Constants and State Management
+ */
+const CURRENT_ROUND_STORAGE_KEY = 'golfScorecardRoundData';
+const APP_VERSION = '1.0.0';
+let currentRoundState = {}; // Global state object
+let debounceTimer; // For input debouncing
+let DOM = {}; // DOM element cache
+
+/**
+ * DOM Ready Event Listener
+ */
+document.addEventListener('DOMContentLoaded', initializeApp);
+
+/**
+ * Initialize the application
+ */
+function initializeApp() {
+    console.log("Initializing Peel & Eat Golf Scorecards...");
+    
+    // Cache DOM elements
+    cacheDOM();
+    
+    // Set current year in footer
+    if (DOM.currentYearSpan) {
+        DOM.currentYearSpan.textContent = new Date().getFullYear();
+    }
+    
+    // Check for localStorage support
+    if (!isStorageAvailable()) {
+        console.warn("LocalStorage not available. State persistence disabled.");
+        showAlert("Your browser doesn't support saving progress. Export your data manually when finished.", "warning", 5000);
+    }
+
+    // Generate scorecard tables
+    generateAllScorecardRows();
+    
+    // Try to load saved state
+    const savedState = loadState();
+    if (savedState && savedState.gameType) {
+        currentRoundState = savedState;
+        console.log("Resuming previous round:", currentRoundState.gameType);
+        
+        if (document.getElementById(`${currentRoundState.gameType}-card`)) {
+            showScorecard(currentRoundState.gameType);
+            DOM.resumeRoundButton.classList.remove('hidden');
+        } else {
+            console.error(`HTML for saved game type "${currentRoundState.gameType}" not found. Clearing state.`);
+            currentRoundState = {};
+            localStorage.removeItem(CURRENT_ROUND_STORAGE_KEY);
+            showGameSelection();
+            DOM.resumeRoundButton.classList.add('hidden');
+        }
+    } else {
+        showGameSelection();
+        DOM.resumeRoundButton.classList.add('hidden');
+    }
+
+    // Add event listeners
+    addEventListeners();
+    
+    console.log("App Initialized");
+}
+
+/**
+ * Cache DOM elements for performance
+ */
+function cacheDOM() {
+    DOM.gameSelectionSection = document.getElementById('game-selection');
+    DOM.activeScorecardSection = document.getElementById('active-scorecard');
+    DOM.gameSelectButtons = document.querySelectorAll('.game-select-btn');
+    DOM.scorecardContainers = document.querySelectorAll('.scorecard');
+    DOM.backButton = document.getElementById('back-to-selection-btn');
+    DOM.clearButton = document.getElementById('clear-round-btn');
+    DOM.copySummaryButton = document.getElementById('copy-summary-btn');
+    DOM.exportButton = document.getElementById('export-data-btn');
+    DOM.importButton = document.getElementById('import-data-btn');
+    DOM.importFileInput = document.getElementById('import-file-input');
+    DOM.resumeRoundButton = document.getElementById('resume-round-btn');
+    DOM.currentYearSpan = document.getElementById('current-year');
+    DOM.loadingOverlay = document.getElementById('loading-overlay');
+    DOM.alertMessage = document.getElementById('alert-message');
+}
