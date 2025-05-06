@@ -131,7 +131,7 @@ function generateVegasRows() {
         }
     }
     
-    tbody.innerHTML = html;
+    if (tbody) tbody.innerHTML = html;
 }
 
 /**
@@ -204,17 +204,27 @@ function populateVegas() {
     const pDNameInput = document.getElementById('vegas-pD-name');
     const pointValueInput = document.getElementById('vegas-point-value');
 
-    if (pANameInput) pANameInput.value = currentRoundState.teams && currentRoundState.teams.t1 && currentRoundState.teams.t1.pA || '';
-    if (pBNameInput) pBNameInput.value = currentRoundState.teams && currentRoundState.teams.t1 && currentRoundState.teams.t1.pB || '';
-    if (pCNameInput) pCNameInput.value = currentRoundState.teams && currentRoundState.teams.t2 && currentRoundState.teams.t2.pC || '';
-    if (pDNameInput) pDNameInput.value = currentRoundState.teams && currentRoundState.teams.t2 && currentRoundState.teams.t2.pD || '';
-    if (pointValueInput) pointValueInput.value = currentRoundState.pointValue !== undefined ? currentRoundState.pointValue : 1;
+    if (pANameInput && currentRoundState.teams && currentRoundState.teams.t1) {
+        pANameInput.value = currentRoundState.teams.t1.pA || '';
+    }
+    if (pBNameInput && currentRoundState.teams && currentRoundState.teams.t1) {
+        pBNameInput.value = currentRoundState.teams.t1.pB || '';
+    }
+    if (pCNameInput && currentRoundState.teams && currentRoundState.teams.t2) {
+        pCNameInput.value = currentRoundState.teams.t2.pC || '';
+    }
+    if (pDNameInput && currentRoundState.teams && currentRoundState.teams.t2) {
+        pDNameInput.value = currentRoundState.teams.t2.pD || '';
+    }
+    if (pointValueInput) {
+        pointValueInput.value = currentRoundState.pointValue !== undefined ? currentRoundState.pointValue : 1;
+    }
 
     // Update headers immediately
-    const pA = currentRoundState.teams && currentRoundState.teams.t1 && currentRoundState.teams.t1.pA || 'A';
-    const pB = currentRoundState.teams && currentRoundState.teams.t1 && currentRoundState.teams.t1.pB || 'B';
-    const pC = currentRoundState.teams && currentRoundState.teams.t2 && currentRoundState.teams.t2.pC || 'C';
-    const pD = currentRoundState.teams && currentRoundState.teams.t2 && currentRoundState.teams.t2.pD || 'D';
+    const pA = currentRoundState.teams && currentRoundState.teams.t1 ? currentRoundState.teams.t1.pA || 'A' : 'A';
+    const pB = currentRoundState.teams && currentRoundState.teams.t1 ? currentRoundState.teams.t1.pB || 'B' : 'B';
+    const pC = currentRoundState.teams && currentRoundState.teams.t2 ? currentRoundState.teams.t2.pC || 'C' : 'C';
+    const pD = currentRoundState.teams && currentRoundState.teams.t2 ? currentRoundState.teams.t2.pD || 'D' : 'D';
 
     const t1Header = document.getElementById('vegas-th-t1');
     const t2Header = document.getElementById('vegas-th-t2');
@@ -235,8 +245,8 @@ function populateVegas() {
     for (let i = 0; i < 18; i++) {
         players.forEach(pKey => {
             const scoreInput = document.getElementById(`vegas-${pKey}-h${i + 1}-score`);
-            if (scoreInput) {
-                const score = currentRoundState.scores && currentRoundState.scores[pKey] && currentRoundState.scores[pKey][i];
+            if (scoreInput && currentRoundState.scores && currentRoundState.scores[pKey]) {
+                const score = currentRoundState.scores[pKey][i];
                 scoreInput.value = score !== undefined ? score : '';
             }
         });
@@ -376,389 +386,244 @@ function updateVegas() {
     if (settlementTextCell) settlementTextCell.textContent = settlementText;
 }
 
-// === GAME IMPLEMENTATION: NASSAU ===
-
 /**
- * Initialize Nassau: Add listeners for press buttons and player name changes
+ * Debounced version of updateActiveCard to avoid excessive updates
  */
-function initializeNassau() {
-    console.log("Initializing Nassau");
-    
-    // Add listeners for press buttons
-    const p1PressBtn = document.getElementById('nassau-press-btn-p1');
-    const p2PressBtn = document.getElementById('nassau-press-btn-p2');
-    if (p1PressBtn) p1PressBtn.addEventListener('click', handleNassauPress);
-    if (p2PressBtn) p2PressBtn.addEventListener('click', handleNassauPress);
-
-    // Add listeners for player name changes
-    const p1Header = document.getElementById('nassau-th-p1');
-    const p2Header = document.getElementById('nassau-th-p2');
-    const p1Input = document.getElementById('nassau-player1-name');
-    const p2Input = document.getElementById('nassau-player2-name');
-    
-    const updateHeaders = () => {
-        if (p1Header && p1Input) p1Header.textContent = p1Input.value || 'Player 1';
-        if (p2Header && p2Input) p2Header.textContent = p2Input.value || 'Player 2';
-    };
-    
-    if (p1Input) p1Input.addEventListener('input', updateHeaders);
-    if (p2Input) p2Input.addEventListener('input', updateHeaders);
-    
-    // Add listener for press rule changes
-    const pressRuleSelect = document.getElementById('nassau-press-rule');
-    if (pressRuleSelect) {
-        pressRuleSelect.addEventListener('change', function() {
-            updateNassau();
-        });
-    }
-    
-    // Generate scorecard rows if needed
-    generateNassauRows();
-}
-
-/**
- * Generate Nassau scorecard rows
- */
-function generateNassauRows() {
-    const tbody = document.getElementById('nassau-scorecard-body');
-    if (!tbody || tbody.children.length > 0) return; // Already populated
-    
-    let html = '';
-    
-    for (let i = 1; i <= 18; i++) {
-        html += `
-            <tr id="nassau-row-h${i}">
-                <td class="td-std font-medium">${i}</td>
-                <td class="td-std"><input type="number" id="nassau-h${i}-par" min="3" max="6" class="input-std input-par" aria-label="Hole ${i} Par"></td>
-                <td class="td-std"><input type="number" id="nassau-p1-h${i}-score" min="1" class="input-std input-score" aria-label="Player 1 Score Hole ${i}"></td>
-                <td class="td-std"><input type="number" id="nassau-p2-h${i}-score" min="1" class="input-std input-score" aria-label="Player 2 Score Hole ${i}"></td>
-                <td class="td-std text-gray-500" id="nassau-h${i}-result"></td>
-                <td class="td-std font-semibold" id="nassau-h${i}-status"></td>
-                <td class="td-std text-xs text-gray-500" id="nassau-h${i}-presses"></td>
-            </tr>`;
+const debouncedUpdate = function(gameType, event) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        console.log(`Debounced update for ${gameType}...`);
         
-        // Add summary rows
-        if (i === 9) {
-            html += `
-                <tr class="bg-gray-100 font-semibold">
-                    <td class="td-std">OUT</td>
-                    <td class="td-std" id="nassau-out-par"></td>
-                    <td class="td-std" id="nassau-p1-out-score"></td>
-                    <td class="td-std" id="nassau-p2-out-score"></td>
-                    <td class="td-std">Front 9:</td>
-                    <td class="td-std" id="nassau-front9-status"></td>
-                    <td class="td-std" id="nassau-front9-presses"></td>
-                </tr>`;
-        } else if (i === 18) {
-            html += `
-                <tr class="bg-gray-100 font-semibold">
-                    <td class="td-std">IN</td>
-                    <td class="td-std" id="nassau-in-par"></td>
-                    <td class="td-std" id="nassau-p1-in-score"></td>
-                    <td class="td-std" id="nassau-p2-in-score"></td>
-                    <td class="td-std">Back 9:</td>
-                    <td class="td-std" id="nassau-back9-status"></td>
-                    <td class="td-std" id="nassau-back9-presses"></td>
-                </tr>
-                <tr class="bg-gray-200 font-bold">
-                    <td class="td-std">TOTAL</td>
-                    <td class="td-std" id="nassau-total-par"></td>
-                    <td class="td-std" id="nassau-p1-total-score"></td>
-                    <td class="td-std" id="nassau-p2-total-score"></td>
-                    <td class="td-std">Overall:</td>
-                    <td class="td-std" id="nassau-overall-status"></td>
-                    <td class="td-std" id="nassau-total-presses"></td>
-                </tr>`;
+        switch (gameType) {
+            case 'nassau': updateNassau(event); break;
+            case 'skins': updateSkins(); break;
+            case 'wolf': updateWolf(); break;
+            case 'bingo': updateBingo(); break;
+            case 'bloodsome': updateBloodsome(); break;
+            case 'stableford': updateStableford(); break;
+            case 'banker': updateBanker(); break;
+            case 'vegas': updateVegas(); break;
         }
-    }
-    
-    tbody.innerHTML = html;
-}
+    }, 300); // 300ms debounce delay
+};
 
 /**
- * Reset Nassau Display: Clear calculated values in the UI
+ * Populates the active card's inputs from the current state
+ * @param {string} gameType - The type of game to populate
  */
-function resetNassauDisplay() {
-    console.log("Reset Nassau Display");
+function populateCardFromState(gameType) {
+    console.log(`Populating ${gameType} card from state...`);
+    const cardElement = document.getElementById(`${gameType}-card`);
+    if (!cardElement || !currentRoundState || !currentRoundState.gameType || currentRoundState.gameType !== gameType) {
+         console.warn(`Cannot populate ${gameType}: State mismatch or card not found.`);
+         return;
+    }
     
-    // Clear hole-by-hole results
-    for (let i = 1; i <= 18; i++) {
-        const resultCell = document.getElementById(`nassau-h${i}-result`);
-        const statusCell = document.getElementById(`nassau-h${i}-status`);
-        const pressesCell = document.getElementById(`nassau-h${i}-presses`);
-        
-        if (resultCell) resultCell.textContent = '';
-        if (statusCell) {
-            statusCell.textContent = '';
-            statusCell.className = 'td-std font-semibold';
+    showLoading(true); // Show loading indicator for larger state changes
+    
+    try {
+        switch (gameType) {
+            case 'nassau': populateNassau(); break;
+            case 'skins': populateSkins(); break;
+            case 'wolf': populateWolf(); break;
+            case 'bingo': populateBingo(); break;
+            case 'bloodsome': populateBloodsome(); break;
+            case 'stableford': populateStableford(); break;
+            case 'banker': populateBanker(); break;
+            case 'vegas': populateVegas(); break;
+            default: console.warn(`Population logic not implemented for ${gameType}`);
         }
-        if (pressesCell) pressesCell.textContent = '';
+        console.log(`Population complete for ${gameType}.`);
+    } catch (error) {
+        console.error(`Error populating ${gameType} card:`, error);
+        showAlert(`Error loading ${gameType} data: ${error.message}`, "error");
+    } finally {
+        showLoading(false); // Hide loading indicator
     }
-    
-    // Clear summary rows
-    const outPar = document.getElementById('nassau-out-par');
-    const inPar = document.getElementById('nassau-in-par');
-    const totalPar = document.getElementById('nassau-total-par');
-    const p1OutScore = document.getElementById('nassau-p1-out-score');
-    const p1InScore = document.getElementById('nassau-p1-in-score');
-    const p1TotalScore = document.getElementById('nassau-p1-total-score');
-    const p2OutScore = document.getElementById('nassau-p2-out-score');
-    const p2InScore = document.getElementById('nassau-p2-in-score');
-    const p2TotalScore = document.getElementById('nassau-p2-total-score');
-    const front9Status = document.getElementById('nassau-front9-status');
-    const back9Status = document.getElementById('nassau-back9-status');
-    const overallStatus = document.getElementById('nassau-overall-status');
-    const front9Presses = document.getElementById('nassau-front9-presses');
-    const back9Presses = document.getElementById('nassau-back9-presses');
-    const totalPresses = document.getElementById('nassau-total-presses');
-    
-    if (outPar) outPar.textContent = '';
-    if (inPar) inPar.textContent = '';
-    if (totalPar) totalPar.textContent = '';
-    if (p1OutScore) p1OutScore.textContent = '';
-    if (p1InScore) p1InScore.textContent = '';
-    if (p1TotalScore) p1TotalScore.textContent = '';
-    if (p2OutScore) p2OutScore.textContent = '';
-    if (p2InScore) p2InScore.textContent = '';
-    if (p2TotalScore) p2TotalScore.textContent = '';
-    if (front9Status) front9Status.textContent = '';
-    if (back9Status) back9Status.textContent = '';
-    if (overallStatus) overallStatus.textContent = '';
-    if (front9Presses) front9Presses.textContent = '';
-    if (back9Presses) back9Presses.textContent = '';
-    if (totalPresses) totalPresses.textContent = '';
-    
-    // Reset headers
-    const p1Header = document.getElementById('nassau-th-p1');
-    const p2Header = document.getElementById('nassau-th-p2');
-    if (p1Header) p1Header.textContent = 'Player 1';
-    if (p2Header) p2Header.textContent = 'Player 2';
-    
-    // Reset settlement display
-    const front9StatusSettlement = document.getElementById('nassau-settlement-front9-status');
-    const back9StatusSettlement = document.getElementById('nassau-settlement-back9-status');
-    const overallStatusSettlement = document.getElementById('nassau-settlement-overall-status');
-    const pressesCount = document.getElementById('nassau-settlement-presses-count');
-    const front9Amount = document.getElementById('nassau-settlement-front9-amount');
-    const back9Amount = document.getElementById('nassau-settlement-back9-amount');
-    const overallAmount = document.getElementById('nassau-settlement-overall-amount');
-    const pressesAmount = document.getElementById('nassau-settlement-presses-amount');
-    const winnerName = document.getElementById('nassau-settlement-winner-name');
-    const totalAmount = document.getElementById('nassau-settlement-total-amount');
-    const summaryText = document.getElementById('nassau-settlement-summary-text');
-    
-    if (front9StatusSettlement) front9StatusSettlement.textContent = '--';
-    if (back9StatusSettlement) back9StatusSettlement.textContent = '--';
-    if (overallStatusSettlement) overallStatusSettlement.textContent = '--';
-    if (pressesCount) pressesCount.textContent = '0';
-    if (front9Amount) front9Amount.textContent = '$0.00';
-    if (back9Amount) back9Amount.textContent = '$0.00';
-    if (overallAmount) overallAmount.textContent = '$0.00';
-    if (pressesAmount) pressesAmount.textContent = '$0.00';
-    if (winnerName) winnerName.textContent = 'Player --';
-    if (totalAmount) totalAmount.textContent = '$0.00';
-    if (summaryText) summaryText.textContent = 'Player 1 owes Player 2 $0.00';
-    
-    // Hide press buttons
-    const p1PressBtn = document.getElementById('nassau-press-btn-p1');
-    const p2PressBtn = document.getElementById('nassau-press-btn-p2');
-    if (p1PressBtn) p1PressBtn.classList.add('hidden');
-    if (p2PressBtn) p2PressBtn.classList.add('hidden');
 }
 
 /**
- * Populate Nassau inputs from state
+ * Generates and copies a summary of the round results
  */
-function populateNassau() {
-    console.log("Populate Nassau");
-    if (!currentRoundState || currentRoundState.gameType !== 'nassau') return;
-
-    // Populate player names
-    const p1NameInput = document.getElementById('nassau-player1-name');
-    const p2NameInput = document.getElementById('nassau-player2-name');
-    const p1Header = document.getElementById('nassau-th-p1');
-    const p2Header = document.getElementById('nassau-th-p2');
-
-    const p1Name = currentRoundState.players && currentRoundState.players[0] || '';
-    const p2Name = currentRoundState.players && currentRoundState.players[1] || '';
-
-    if (p1NameInput) p1NameInput.value = p1Name;
-    if (p2NameInput) p2NameInput.value = p2Name;
-    if (p1Header) p1Header.textContent = p1Name || 'Player 1';
-    if (p2Header) p2Header.textContent = p2Name || 'Player 2';
-
-    // Populate scores
-    for (let i = 0; i < 18; i++) {
-        const parInput = document.getElementById(`nassau-h${i + 1}-par`);
-        const p1ScoreInput = document.getElementById(`nassau-p1-h${i + 1}-score`);
-        const p2ScoreInput = document.getElementById(`nassau-p2-h${i + 1}-score`);
-
-        const parValue = currentRoundState.par && currentRoundState.par[i] || '';
-        const p1Score = currentRoundState.scores && currentRoundState.scores.p1 && currentRoundState.scores.p1[i];
-        const p2Score = currentRoundState.scores && currentRoundState.scores.p2 && currentRoundState.scores.p2[i];
-
-        if (parInput) parInput.value = parValue;
-        if (p1ScoreInput) p1ScoreInput.value = p1Score !== undefined ? p1Score : '';
-        if (p2ScoreInput) p2ScoreInput.value = p2Score !== undefined ? p2Score : '';
+function copySummary() {
+    if (!currentRoundState || !currentRoundState.gameType) {
+        showAlert("No active round to summarize.", "warning");
+        return;
     }
 
-    // Calculated fields will be populated by updateNassau()
-    updateNassau();
-}
-
-/**
- * Update Nassau: Calculate match status, handle presses, update settlement
- * @param {Event} event - The event that triggered the update (optional)
- */
-function updateNassau(event = null) {
-    console.log("Update Nassau");
-    if (!currentRoundState || currentRoundState.gameType !== 'nassau') return;
-
-    // --- 1. Read Inputs into State ---
-    const p1NameInput = document.getElementById('nassau-player1-name');
-    const p2NameInput = document.getElementById('nassau-player2-name');
-    const wagerInput = document.getElementById('nassau-wager');
-    const pressRuleInput = document.getElementById('nassau-press-rule');
-
-    currentRoundState.players = [
-        p1NameInput && p1NameInput.value || '',
-        p2NameInput && p2NameInput.value || ''
-    ];
-
-    currentRoundState.wager = wagerInput && parseFloat(wagerInput.value) || 5;
-    currentRoundState.pressRule = pressRuleInput && pressRuleInput.value || 'manual';
-
-    let par = [];
-    let scores = { p1: [], p2: [] };
-
-    for (let i = 0; i < 18; i++) {
-        const parInput = document.getElementById(`nassau-h${i + 1}-par`);
-        const p1Input = document.getElementById(`nassau-p1-h${i + 1}-score`);
-        const p2Input = document.getElementById(`nassau-p2-h${i + 1}-score`);
-
-        const parVal = parInput && parInput.value || '';
-        const p1Val = p1Input && p1Input.value || '';
-        const p2Val = p2Input && p2Input.value || '';
-
-        if (parVal) par[i] = parseInt(parVal);
-        if (p1Val) scores.p1[i] = parseInt(p1Val);
-        if (p2Val) scores.p2[i] = parseInt(p2Val);
+    let summaryText = `Peel & Eat Scorecard Summary\n============================\n`;
+    summaryText += `Game: ${currentRoundState.gameType.toUpperCase()}\n`;
+    summaryText += `Date: ${new Date().toLocaleDateString()}\n`;
+    
+    // Adjust player display for team games
+    if (currentRoundState.players) {
+         summaryText += `Players: ${currentRoundState.players.filter(p => p).join(', ') || 'N/A'}\n`;
+    } else if (currentRoundState.teams) {
+         const t1 = currentRoundState.teams.t1;
+         const t2 = currentRoundState.teams.t2;
+         const t1Name = `${t1.pA || 'P A'}/${t1.pB || 'P B'}`;
+         const t2Name = `${t2.pC || 'P C'}/${t2.pD || 'P D'}`;
+         summaryText += `Team 1: ${t1Name}\n`;
+         summaryText += `Team 2: ${t2Name}\n`;
     }
 
-    currentRoundState.par = par;
-    currentRoundState.scores = scores;
+    // Show wager/value information
+    if (currentRoundState.wager !== undefined || currentRoundState.pointValue !== undefined) {
+        const value = currentRoundState.wager ?? currentRoundState.pointValue ?? '?';
+        let unit = 'per Point/Match';
+        if (currentRoundState.gameType === 'skins') unit = 'per Skin';
+        else if (['wolf', 'bingo', 'stableford', 'banker', 'vegas'].includes(currentRoundState.gameType)) unit = 'per Point';
+        else if (currentRoundState.gameType === 'bloodsome') unit = 'per Match';
+        summaryText += `Value: ${formatCurrency(value)} ${unit}\n`;
+    }
+    
+    // Add Quotas for Banker
+    if (currentRoundState.gameType === 'banker' && currentRoundState.quotas) {
+        summaryText += `Quotas: ${currentRoundState.players.map((name, i) => 
+            `${name || `P${i+1}`}: ${currentRoundState.quotas[i]}`).join(', ')}\n`;
+    }
 
-    // --- 2. Calculate Match Status ---
-    let front9Score = 0;
-    let back9Score = 0;
-    let totalScore = 0;
+    // Results section
+    summaryText += `\n--- Results & Settlement ---\n`;
+    const settlement = currentRoundState.settlement; // Shortcut
 
-    for (let i = 0; i < 18; i++) {
-        const p1Score = scores.p1[i];
-        const p2Score = scores.p2[i];
-
-        if (p1Score !== undefined && p2Score !== undefined) {
-            const holeDiff = p2Score - p1Score;
-            const resultCell = document.getElementById(`nassau-h${i + 1}-result`);
-            const statusCell = document.getElementById(`nassau-h${i + 1}-status`);
-            const pressesCell = document.getElementById(`nassau-h${i + 1}-presses`);
+    switch (currentRoundState.gameType) {
+        case 'nassau':
+            if (settlement?.summaryText) {
+                summaryText += `Front 9: ${settlement.front9StatusText || '--'} (${settlement.front9AmountText || '$0.00'})\n`;
+                summaryText += `Back 9: ${settlement.back9StatusText || '--'} (${settlement.back9AmountText || '$0.00'})\n`;
+                summaryText += `Overall: ${settlement.overallStatusText || '--'} (${settlement.overallAmountText || '$0.00'})\n`;
+                summaryText += `Presses (${settlement.pressesCount || 0}): ${settlement.pressesAmountText || '$0.00'}\n`;
+                summaryText += `--------------------\n`;
+                summaryText += `Final: ${settlement.summaryText}\n`;
+            } else {
+                summaryText += "Settlement not calculated.\n";
+            }
+            break;
             
-            resultCell.textContent = holeDiff;
-            statusCell.textContent = holeDiff > 0 ? 'W' : holeDiff < 0 ? 'L' : 'T';
-            pressesCell.textContent = '0';
-
-            if (i < 9) front9Score += holeDiff;
-            else back9Score += holeDiff;
-            totalScore += holeDiff;
-        }
+        case 'skins':
+            if (settlement && settlement.summaryText) {
+                currentRoundState.players.forEach((name, i) => {
+                    const pName = name || `P${i+1}`;
+                    summaryText += `${pName}: ${settlement.skinsWon?.[i] || 0} Skins, ${formatCurrency(settlement.winnings?.[i] || 0)}\n`;
+                });
+                summaryText += `--------------------\n`;
+                summaryText += `Total Pot Value: ${formatCurrency(settlement.totalPot || 0)}\n`;
+            } else {
+                summaryText += "Skins settlement not calculated.\n";
+            }
+            break;
+            
+        case 'wolf':
+            if (settlement && settlement.summaryText) {
+                currentRoundState.players.forEach((name, i) => {
+                    const pName = name || `P${i+1}`;
+                    summaryText += `${pName}: ${settlement.totalPoints?.[i] || 0} Pts, ${formatCurrency(settlement.winnings?.[i] || 0)}\n`;
+                });
+                summaryText += `--------------------\n`;
+                summaryText += `Settlement: ${settlement.summaryText}\n`;
+            } else {
+                summaryText += "Wolf settlement not calculated.\n";
+            }
+            break;
+            
+        case 'bingo':
+            if (settlement && settlement.summaryText) {
+                currentRoundState.players.forEach((name, i) => {
+                    const pName = name || `P${i+1}`;
+                    summaryText += `${pName}: ${settlement.totalPoints?.[i] || 0} Pts, ${formatCurrency(settlement.winnings?.[i] || 0)}\n`;
+                });
+                summaryText += `--------------------\n`;
+                summaryText += `Settlement: ${settlement.summaryText}\n`;
+            } else {
+                summaryText += "Bingo Bango Bongo settlement not calculated.\n";
+            }
+            break;
+            
+        case 'bloodsome':
+            summaryText += settlement?.summaryText || "Bloodsome settlement not calculated.\n";
+            break;
+            
+        case 'stableford':
+            if (settlement && settlement.summaryText) {
+                currentRoundState.players.forEach((name, i) => {
+                    const pName = name || `P${i+1}`;
+                    summaryText += `${pName}: ${settlement.totalPoints?.[i] || 0} Pts, ${formatCurrency(settlement.winnings?.[i] || 0)}\n`;
+                });
+                summaryText += `--------------------\n`;
+                summaryText += `Settlement: ${settlement.summaryText}\n`;
+            } else {
+                summaryText += "Stableford settlement not calculated.\n";
+            }
+            break;
+            
+        case 'banker':
+            if (settlement && settlement.summaryText) {
+                currentRoundState.players.forEach((name, i) => {
+                    const pName = name || `P${i+1}`;
+                    const vsQuota = settlement.vsQuota?.[i] || 0;
+                    summaryText += `${pName}: ${settlement.totalPoints?.[i] || 0} Pts (Quota ${currentRoundState.quotas?.[i]}, ${vsQuota >= 0 ? '+' : ''}${vsQuota}), ${formatCurrency(settlement.winnings?.[i] || 0)}\n`;
+                });
+                summaryText += `--------------------\n`;
+                summaryText += `Settlement: ${settlement.summaryText}\n`;
+            } else {
+                summaryText += "Banker/Quota settlement not calculated.\n";
+            }
+            break;
+            
+        case 'vegas':
+            summaryText += settlement?.summaryText || "Vegas settlement not calculated.\n";
+            break;
+            
+        default:
+            summaryText += settlement?.summaryText || "Settlement not implemented for this game.";
+            break;
     }
+    summaryText += `============================\n`;
 
-    let front9Status = null;
-    let back9Status = null;
-    let overallStatus = null;
-
-    if (front9Score > 0) front9Status = 'W';
-    else if (front9Score < 0) front9Status = 'L';
-    else front9Status = 'T';
-
-    if (back9Score > 0) back9Status = 'W';
-    else if (back9Score < 0) back9Status = 'L';
-    else back9Status = 'T';
-
-    if (totalScore > 0) overallStatus = 'W';
-    else if (totalScore < 0) overallStatus = 'L';
-    else overallStatus = 'T';
-
-    // Update UI
-    for (let i = 0; i < 18; i++) {
-        const resultCell = document.getElementById(`nassau-h${i + 1}-result`);
-        const statusCell = document.getElementById(`nassau-h${i + 1}-status`);
-        const pressesCell = document.getElementById(`nassau-h${i + 1}-presses`);
-        
-        resultCell.textContent = scores.p1[i] !== undefined && scores.p2[i] !== undefined ? scores.p2[i] - scores.p1[i] : '';
-        statusCell.textContent = front9Status !== null && back9Status !== null && overallStatus !== null ? statusCell.textContent : '';
-        pressesCell.textContent = '0';
+    // Try to copy to clipboard with improved error handling
+    try {
+        navigator.clipboard.writeText(summaryText)
+            .then(() => {
+                showAlert("Round summary copied to clipboard!", "success");
+            })
+            .catch(err => {
+                console.error('Failed to copy summary: ', err);
+                showAlert("Unable to automatically copy to clipboard. Manual copy option provided.", "warning");
+                
+                // Create temporary textarea for manual copy
+                const textarea = document.createElement('textarea');
+                textarea.value = summaryText;
+                textarea.style.position = 'fixed';
+                document.body.appendChild(textarea);
+                textarea.focus();
+                textarea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    showAlert("Summary copied to clipboard using alternative method.", "success");
+                } catch (e) {
+                    console.error('Secondary copy method failed:', e);
+                    alert("Please copy the summary manually:\n\n" + summaryText);
+                }
+                
+                document.body.removeChild(textarea);
+            });
+    } catch (e) {
+        console.error('Clipboard API not available:', e);
+        alert("Please copy the summary manually:\n\n" + summaryText);
     }
-
-    // Update settlement
-    let settlementText = '';
-    let settlementAmount = 0;
-    let winner = null;
-    
-    if (front9Score === 0 && back9Score === 0 && totalScore === 0) {
-        settlementText = "All square - no money changes hands";
-        settlementAmount = 0;
-        winner = null;
-    } else if (front9Score > 0 && back9Score > 0 && totalScore > 0) {
-        settlementText = "Team 2 wins";
-        settlementAmount = Math.abs(front9Score) + Math.abs(back9Score);
-        winner = 'Team 2';
-    } else if (front9Score < 0 && back9Score < 0 && totalScore < 0) {
-        settlementText = "Team 1 wins";
-        settlementAmount = Math.abs(front9Score) + Math.abs(back9Score);
-        winner = 'Team 1';
-    } else {
-        settlementText = "Team 1 owes Team 2 money";
-        settlementAmount = Math.abs(front9Score) + Math.abs(back9Score);
-        winner = 'Team 1';
-    }
-    
-    currentRoundState.settlement = {
-        summaryText: settlementText,
-        amount: settlementAmount,
-        winner: winner
-    };
-
-    // Update summary rows
-    const outPar = document.getElementById('nassau-out-par');
-    const inPar = document.getElementById('nassau-in-par');
-    const totalPar = document.getElementById('nassau-total-par');
-    const p1OutScore = document.getElementById('nassau-p1-out-score');
-    const p1InScore = document.getElementById('nassau-p1-in-score');
-    const p1TotalScore = document.getElementById('nassau-p1-total-score');
-    const p2OutScore = document.getElementById('nassau-p2-out-score');
-    const p2InScore = document.getElementById('nassau-p2-in-score');
-    const p2TotalScore = document.getElementById('nassau-p2-total-score');
-    const front9StatusCell = document.getElementById('nassau-front9-status');
-    const back9StatusCell = document.getElementById('nassau-back9-status');
-    const overallStatusCell = document.getElementById('nassau-overall-status');
-    const front9Presses = document.getElementById('nassau-front9-presses');
-    const back9Presses = document.getElementById('nassau-back9-presses');
-    const totalPresses = document.getElementById('nassau-total-presses');
-    
-    if (outPar) outPar.textContent = front9Score > 0 ? 'Front 9: W' : front9Score < 0 ? 'Front 9: L' : 'Front 9: T';
-    if (inPar) inPar.textContent = back9Score > 0 ? 'Back 9: W' : back9Score < 0 ? 'Back 9: L' : 'Back 9: T';
-    if (totalPar) totalPar.textContent = overallStatus !== null ? overallStatus : '';
-    if (p1OutScore) p1OutScore.textContent = front9Score > 0 ? scores.p1[0] !== undefined && scores.p2[0] !== undefined ? scores.p2[0] - scores.p1[0] : '' : '';
-    if (p1InScore) p1InScore.textContent = front9Score < 0 ? scores.p1[0] !== undefined && scores.p2[0] !== undefined ? scores.p2[0] - scores.p1[0] : '' : '';
-    if (p1TotalScore) p1TotalScore.textContent = front9Score > 0 ? scores.p1[0] !== undefined && scores.p2[0] !== undefined ? scores.p2[0] : '' : '';
-    if (p2OutScore) p2OutScore.textContent = back9Score > 0 ? scores.p2[0] !== undefined && scores.p1[0] !== undefined ? scores.p2[0] - scores.p1[0] : '' : '';
-    if (p2InScore) p2InScore.textContent = back9Score < 0 ? scores.p2[0] !== undefined && scores.p1[0] !== undefined ? scores.p2[0] - scores.p1[0] : '' : '';
-    if (p2TotalScore) p2TotalScore.textContent = back9Score > 0 ? scores.p2[0] !== undefined && scores.p1[0] !== undefined ? scores.p2[0] : '' : '';
-    if (front9StatusCell) front9StatusCell.textContent = front9Status !== null ? front9Status : '';
-    if (back9StatusCell) back9StatusCell.textContent = back9Status !== null ? back9Status : '';
-    if (overallStatusCell) overallStatusCell.textContent = overallStatus !== null ? overallStatus : '';
-    if (front9Presses) front9Presses.textContent = front9Score > 0 ? 'Front 9: W' : front9Score < 0 ? 'Front 9: L' : 'Front 9: T';
-    if (back9Presses) back9Presses.textContent = back9Score > 0 ? 'Back 9: W' : back9Score < 0 ? 'Back 9: L' : 'Back 9: T';
-    if (totalPresses) totalPresses.textContent = overallStatus !== null ? overallStatus : '';
 }
+
+// Export functions
+export {
+    initializeVegas,
+    generateVegasRows,
+    resetVegasDisplay,
+    populateVegas,
+    updateVegas,
+    calculateVegasTeamNumber,
+    debouncedUpdate,
+    populateCardFromState,
+    copySummary
+};
